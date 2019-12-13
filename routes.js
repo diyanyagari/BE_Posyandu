@@ -50,9 +50,12 @@ module.exports = function (app) {
     app.route('/searchKunjungan')
         .post(todoList.searchKunjungan);
 
-    app.route('/updateKunjungan')
-        .post(todoList.updateKunjungan);
-
     app.route('/viewKunjunganBalita')
         .post(todoList.viewKunjunganBalita);
+
+    app.route('/insertKunjunganIbuHamil')
+        .post(todoList.insertKunjunganIbuHamil);
+
+    app.route('/viewKunjunganIbuHamil')
+        .post(todoList.viewKunjunganIbuHamil);
 };

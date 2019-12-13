@@ -216,7 +216,7 @@ exports.insertKunjungan = function (req, res) {
 		function (error, rows, fields) {
 			if (error) {
 				console.log(error)
-				response.fail('error ocurred', res)
+				response.fail(error, res)
 			} else {
 				if (rows.length > 0) {
 					let ro = JSON.stringify(rows[0]);
@@ -237,6 +237,8 @@ exports.insertKunjungan = function (req, res) {
 					var jenisImunisasi = req.body.jenisImunisasi
 					var keteranganPemberianVit = req.body.keteranganPemberianVitamin
 					var sttsGizi = req.body.sttsGizi
+					var cekGizi = req.body.cekGizi
+					var pemberianObat = req.body.pemberianObat
 
 					if (id_jenis_kunjungan == "BB") {
 						connection.query('UPDATE kunjungan SET tgl_kunjungan = ?, id_jenis_kunjungan = ?, beratbadan = ?, tinggi = ?, sttsGizi = ? WHERE tgl_kunjungan = ? AND id_balita = ?',
@@ -269,18 +271,26 @@ exports.insertKunjungan = function (req, res) {
 								}
 							});
 					} else if (id_jenis_kunjungan == "CG") {
-
+						connection.query('UPDATE kunjungan SET tgl_kunjungan = ?, id_jenis_kunjungan = ?, cek_gizi = ? WHERE tgl_kunjungan = ? AND id_balita = ?',
+							[tgl_kunjungan, id_jenis_kunjungan, cekGizi, tglL, id],
+							function (err, ro, fi) {
+								if (err) {
+									response.fail(err, res)
+								} else {
+									response.ok("Berhasil menambahkan kunjungan.", res)
+								}
+							});
+					} else if (id_jenis_kunjungan == "PO") {
+						connection.query('UPDATE kunjungan SET tgl_kunjungan = ?, id_jenis_kunjungan = ?, pemb_obat = ? WHERE tgl_kunjungan = ? AND id_balita = ?',
+							[tgl_kunjungan, id_jenis_kunjungan, pemberianObat, tglL, id],
+							function (err, ro, fi) {
+								if (err) {
+									response.fail(err, res)
+								} else {
+									response.ok("Berhasil menambahkan kunjungan.", res)
+								}
+							});
 					}
-					// connection.query('UPDATE kunjungan SET tgl_kunjungan = ?, id_jenis_kunjungan = ?, beratbadan = ?, tinggi = ?, jenisImunisasi = ? WHERE id_kunjungan = ?',
-					//     [tgl_kunjungan, id_jenis_kunjungan, beratbadan, tinggi, jenisImunisasi, id],
-					//     function (err, ro, fi) {
-					//         if (err) {
-					//             response.fail(err, res)
-					//         } else {
-					//             response.ok("Berhasil menambahkan kunjungan.", res)
-					//             console.log(jenisImunisasi)
-					//         }
-					//     });
 				}
 				else {
 					var tgl_kunjungan = req.body.tgl_kunjungan;
@@ -290,38 +300,18 @@ exports.insertKunjungan = function (req, res) {
 					var tinggi = req.body.tinggi;
 					var jenisImunisasi = req.body.jenisImunisasi;
 					var keteranganPemberianVitamin = req.body.keteranganPemberianVitamin;
-					connection.query('INSERT INTO kunjungan (tgl_kunjungan, id_balita, id_jenis_kunjungan, beratbadan, tinggi, jenisImunisasi, keteranganPemberianVit) values (?,?,?,?,?,?,?)',
-						[tgl_kunjungan, id_balita, id_jenis_kunjungan, beratbadan, tinggi, jenisImunisasi, keteranganPemberianVitamin],
+					var sttsGizi = req.body.sttsGizi;
+					connection.query('INSERT INTO kunjungan (tgl_kunjungan, id_balita, id_jenis_kunjungan, beratbadan, tinggi, jenisImunisasi, keteranganPemberianVit, sttsGizi) values (?,?,?,?,?,?,?,?)',
+						[tgl_kunjungan, id_balita, id_jenis_kunjungan, beratbadan, tinggi, jenisImunisasi, keteranganPemberianVitamin, sttsGizi],
 						function (err, ro, fi) {
 							if (err) {
-								response.fail('error ocurred', res)
+								response.fail(err, res)
 							} else {
 								response.ok("Berhasil membuat kunjungan.", res)
 							}
 						});
 				}
 
-			}
-		});
-};
-
-/*
-    *UPDATE KUNJUNGAN
-*/
-exports.updateKunjungan = function (req, res) {
-	var tgl_kunjungan = req.body.nama_ayah;
-	var id_balita = req.body.nik_ayah;
-	var id_jenis_kunjungan = req.body.nama_ibu;
-	var beratbadan = req.body.nik_ibu;
-	var tinggi = req.body.alamat;
-	var jenisImunisasi = req.body.noHp;
-	connection.query('UPDATE kunjungan SET tgl_kunjungan = ?, id_jenis_kunjungan = ?, beratbadan = ?, tinggi = ?, jenisImunisasi = ? WHERE id = ?',
-		[tgl_kunjungan, id_jenis_kunjungan, beratbadan, tinggi, jenisImunisasi, id],
-		function (err, ro, fi) {
-			if (error) {
-				response.fail('error ocurred', res)
-			} else {
-				response.ok("Berhasil menambahkan kunjungan.", res)
 			}
 		});
 };
@@ -352,5 +342,59 @@ exports.viewKunjunganBalita = function (req, res) {
 				}
 			});
 	}
+};
 
+/*
+    *INSERT KUNJUNGAN IBU HAMIL
+*/
+exports.insertKunjunganIbuHamil = function (req, res) {
+	var id_ibu = req.body.id_ibu;
+	var tgl_kunjungan = req.body.tgl_kunjungan;
+	var bb = req.body.bb;
+	var rPenyakit = req.body.rPenyakit;
+	var rAlergi = req.body.rAlergi;
+	var rKB = req.body.rKB;
+	var hamilke = req.body.hamilke;
+	var usiaAnakTerakhir = req.body.usiaAnakTerakhir;
+	var tmptLahirAnak = req.body.tmptLahirAnak;
+	var BBAnak = req.body.BBAnak;
+	var rImunisasi = req.body.rImunisasi;
+
+	connection.query('INSERT INTO kunjunganIbuHamil (id_ibu_hamil, tgl_kunjungan, BB, riwayatPenyakit, riwayatAlergi, riwayatKB, hamilke, usiaAnakTerakhir, tempat_lahir, BBanakTerakhir, riwayatImunisasi) values (?,?,?,?,?,?,?,?,?,?,?)',
+		[id_ibu, tgl_kunjungan, bb, rPenyakit, rAlergi, rKB, hamilke, usiaAnakTerakhir, tmptLahirAnak, BBAnak, rImunisasi],
+		function (error, rows, fields) {
+			if (error) {
+				console.log(error)
+			} else {
+				response.ok("Berhasil menambahkan data ibu hamil.", res)
+			}
+		});
+};
+
+/*
+    *VIEW KUNJUNGAN IBU HAMIL
+*/
+exports.viewKunjunganIbuHamil = function (req, res) {
+	var id = req.body.id_ibu_hamil;
+
+	if ((id == null) || (id == '')) {
+		connection.query('SELECT * from kunjunganIbuHamil',
+			function (err, ro, fi) {
+				if (err) {
+					response.fail('error ocurred', res)
+				} else {
+					response.ok(ro, res)
+				}
+			});
+	} else {
+		connection.query('SELECT * from kunjunganIbuHamil WHERE id_ibu_hamil = ?',
+			[id],
+			function (err, ro, fi) {
+				if (err) {
+					response.fail('error ocurred', res)
+				} else {
+					response.ok(ro, res)
+				}
+			});
+	}
 };
